@@ -32,28 +32,31 @@ public class UserServiceImpl implements UserService{
 		
 		log.info("Inside signup {}",requestMap);
 		
-		if(validateSignUpMap(requestMap))
-		{
-			Optional<User> user = userdao.findByEmail(requestMap.get("email"));
-			
-			if (user.isPresent()) {
-				return CafeUtils.getResponseEntity(CafeConstants.EMAIL_ALREADY_EXISTS, HttpStatus.CONFLICT);
-			}
-			else
+		try {
+			if(validateSignUpMap(requestMap))
 			{
-				User newUser = createUser(user);
-                
-                userdao.save(newUser);
+				Optional<User> user = userdao.findByEmail(requestMap.get("email"));
+				
+				if (user.isPresent()) {
+					return CafeUtils.getResponseEntity(CafeConstants.EMAIL_ALREADY_EXISTS, HttpStatus.CONFLICT);
+				}
+				else
+				{
+					User newUser = createUser(requestMap); 
+			        
+			        userdao.save(newUser);
+			        return CafeUtils.getResponseEntity(CafeConstants.SUCCESSFULLY_REGISTERED, HttpStatus.OK);
+				}
 			}
+			else {
+				return CafeUtils.getResponseEntity(CafeConstants.INVALIDE_DATA, HttpStatus.BAD_REQUEST);
+			}
+		} catch (Exception e) {
+			
+			e.printStackTrace();
 		}
-		else {
-			return CafeUtils.getResponseEntity(CafeConstants.INVALIDE_DATA, HttpStatus.BAD_REQUEST);
-		}
-
-
-
 		
-		return null;
+		return CafeUtils.getResponseEntity(CafeConstants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR); 
 	}
 
 	
